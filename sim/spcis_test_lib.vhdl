@@ -136,6 +136,25 @@ package spcis_test_lib is
             signal clk : in std_logic;
             signal pci_bus : inout pci_bus_t;
             constant address : in std_logic_vector(31 downto 0)); 
+
+    -- local bus monitor
+    procedure lb_cycle_monitor(
+            signal clk : in std_logic;
+            signal data_in : in std_logic_vector(31 downto 0);        
+            signal ack : in std_logic;
+            signal data_out : in std_logic_vector(31 downto 0);
+            signal addr : in std_logic_vector;
+            signal byte_en : in std_logic_vector(3 downto 0);
+            signal rd : in std_logic;
+            signal wr : in std_logic;
+            signal last_lb_data_in : out std_logic_vector(31 downto 0);
+            signal last_lb_data_out : out std_logic_vector(31 downto 0);
+            signal last_lb_acked : out std_logic;
+            signal last_lb_addr : out std_logic_vector;
+            signal last_lb_byte_en : out std_logic_vector(3 downto 0);
+            signal last_lb_rd : out std_logic;
+            signal last_lb_wr : out std_logic);
+
 end;
 
 package body spcis_test_lib is
@@ -296,7 +315,6 @@ package body spcis_test_lib is
         pci_write(clk, pci_bus, PCI_MEM_WR, address, 0, n_byte_en, data);
     end procedure;
 
-
     -- read from PCI target with single data phase
     procedure pci_read(
             signal clk : in std_logic;
@@ -416,6 +434,52 @@ package body spcis_test_lib is
         wait until falling_edge(clk);
         pci_bus.n_irdy <= 'Z';        
         pci_bus.n_trdy <= 'Z';        
+    end procedure;
+
+    -- monitor local bus 
+    procedure lb_cycle_monitor(
+            signal clk : in std_logic;
+            signal data_in : in std_logic_vector(31 downto 0);        
+            signal ack : in std_logic;
+            signal data_out : in std_logic_vector(31 downto 0);
+            signal addr : in std_logic_vector;
+            signal byte_en : in std_logic_vector(3 downto 0);
+            signal rd : in std_logic;
+            signal wr : in std_logic;
+            signal last_lb_data_in : out std_logic_vector(31 downto 0);
+            signal last_lb_data_out : out std_logic_vector(31 downto 0);
+            signal last_lb_acked : out std_logic;
+            signal last_lb_addr : out std_logic_vector;
+            signal last_lb_byte_en : out std_logic_vector(3 downto 0);
+            signal last_lb_rd : out std_logic;
+            signal last_lb_wr : out std_logic) is
+        variable i : integer := 0;
+    begin
+        loop
+            wait until falling_edge(clk);
+            if rd = '1' or wr = '1' then
+                last_lb_rd <= rd;
+                last_lb_wr <= wr;
+                exit;
+            end if;
+        end loop;
+        last_lb_data_out <= data_out;
+        last_lb_addr <= addr;
+        last_lb_byte_en <= byte_en;
+        loop
+            if ack = '1' then
+                last_lb_acked <= '1';
+                last_lb_data_in <= data_in;
+                exit;
+            else
+                last_lb_acked <= '0';
+            end if;
+            if i = 3 then
+                exit;
+            end if;
+            i := i + 1;
+            wait until falling_edge(clk);
+        end loop;
     end procedure;
 
 end;
