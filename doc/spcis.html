@@ -1,0 +1,294 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
+<head>
+<title>spcis - Open source PCI slave VHDL module</title>
+
+<style type="text/css">
+
+a {
+  outline: 0;
+}
+
+#top {
+  margin-left: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+#top-menu {
+  float: right;
+}
+
+body { 
+  font-family: sans-serif;
+  font-size: 10pt;
+  max-width: 45em; 
+  margin-left: auto;
+  margin-right: auto;
+} 
+
+.codebox {
+  font-size: 9pt;
+  background: #e0e0ff;
+  border: 1px solid #a0a0ff;
+  width: 90%;
+  margin-top: 25px;
+  margin-bottom: 25px;  
+  margin-left: 2%;
+  margin-right: auto;
+  padding-left: 10px;
+}
+
+thead {
+  font-style: italic;
+}
+
+table {
+  font-weight: normal;
+  border-collapse: collapse;
+  margin-left: 10px;
+}
+
+td {
+  padding-right: 10px;
+  border: 1px solid;
+}
+
+h1 {
+  font-size: 120%;
+}
+
+h2 {
+  font-size: 100%;
+  font-style: italic;
+}
+
+.syn-cmt {
+  color: #007000;
+}
+
+</style>
+</head>
+<body>
+
+<img id="top" src="gates.png" />
+
+<span id="top-menu">
+<a href="http://pdt.github.com/">pdt home</a>
+</span>
+
+<h1>spcis</h1>
+
+<p>
+spcis is a Simple PCI Slave VHDL module, with top level ports as follows:
+</p>
+
+<div class="codebox">
+<pre>
+<span class="syn-cmt">--
+--   -------------------------
+-- --|clk                    |--
+-- --|rst                    |--
+-- --|                       |--
+-- --|idsel              ad[]|--
+-- --|c_n_be[]       n_devsel|--
+-- --|n_frame          n_trdy|--
+-- --|n_irdy           n_stop|--
+-- --|                 n_inta|--
+-- --|                    par|--
+-- --|                       |--
+-- --|data_in[]    data_out[]|--
+-- --|ack              addr[]|--
+-- --|int           byte_en[]|--
+-- --|                     rd|--
+-- --|                     wr|--
+--   -------------------------
+--</span> 
+</pre>
+</div>
+
+<p>
+The module broadly consists of a PCI interface, a local bus interface, and some
+generics for configuration. The module also has an active high asynchronous 
+reset for resetting all parts of the module. 
+</p>
+
+<h1>PCI Interface</h1>
+
+<p>
+PCI interface signals are as follows:
+</p>
+
+<table>
+<thead>
+<tr><td>Signal</td><td>Direction</td><td>Description</td></tr>
+</thead>
+<tbody>
+<tr><td>clk</td><td>in</td><td>33MHz PCI clock</td></tr>
+<tr><td>idsel</td><td>in</td><td>PCI IDSEL</td></tr>
+<tr> <td>c_n_be</td><td>in</td><td>PCI C/BE#</td></tr>
+<tr><td>n_frame</td><td>in</td><td>PCI FRAME#</td></tr>
+<tr><td>n_irdy</td><td>in</td><td>PCI IRDY#</td></tr>
+<tr><td>ad</td><td>in/out</td><td>PCI AD</td></tr>
+<tr><td>n_devsel</td><td>out</td><td>PCI DEVSEL#</td></tr>
+<tr><td>n_trdy</td><td>out</td><td>PCI TRDY#</td></tr>
+<tr><td>n_stop</td><td>out</td><td>PCI STOP#</td></tr>
+<tr><td>n_inta</td><td>out</td><td>PCI INTA#</td></tr>
+<tr><td>par</td><td>out</td><td>PCI PAR</td></tr>
+</tbody>
+</table>
+
+<p>
+Note that the spcis module does not include the PCI PERR# and SERR# signals. 
+Also, the PCI PAR signal is an output only - it is driven to satisfy the 
+requirements of the system it's used in, but isn't used to check parity during 
+PCI writes.
+</p>
+
+
+<h1>LB Interface</h1>
+
+<p>
+Local bus signals are as follows:
+</p>
+
+<table>
+<thead>
+<tr><td>Signal</td><td>Direction</td><td>Description</td></tr>
+</thead>
+<tbody>
+<tr><td>data_in</td><td>in</td><td>local bus data in</td></tr>
+<tr><td>ack</td><td>in</td><td>local bus acknowledgement</td></tr>
+<tr><td>int</td><td>in</td><td>local bus interrupt</td></tr>
+<tr><td>data_out</td><td>out</td><td>local bus data out</td></tr>
+<tr><td>addr</td><td>out</td><td>local bus address</td></tr>
+<tr><td>byte_en</td><td>out</td><td>local bus byte enables</td></tr>
+<tr><td>rd</td><td>out</td><td>local bus read</td></tr>
+<tr><td>wr</td><td>out</td><td>local bus write</td></tr>
+</tbody>
+</table>
+
+<p>
+The local bus interface drives 32-bit data out, address, 4 byte enables, a read
+signal and a write signal. The module receives 32-bit data in during reads and 
+takes in an acknowledgement signal to indicate cycle completion for both read 
+and write cycles. The local bus interface also has an interrupt input, which 
+the module uses for driving the PCI interrupt INTA#.
+</p>
+
+<p>
+A local bus cycle is in progress when either <code>rd</code> or <code>wr</code>
+are active. All driven signals are stable for the duration of a bus cycle. The
+bus cycle is terminated on reception of an ack, or will terminate automatically
+if no ack is received within 4 clock periods. All local bus signals are active 
+high.
+</p>
+
+<h1>Generics</h1>
+
+<p>
+Generics for setting PCI configuration registers, and configuring the module
+itself, are as follows: 
+</p>
+
+<table>
+<thead>
+<tr><td>Generic</td><td>Description</td></tr>
+</thead>
+<tbody>
+<tr><td>VENDOR_ID</td><td>PCI Vendor ID code</td></tr>
+<tr><td>DEVICE_ID</td><td>PCI Device ID code</td></tr>
+<tr><td>SUBSYSTEM_VENDOR_ID</td><td>PCI Subsystem Vendor ID code</td></tr>
+<tr><td>SUBSYSTEM_ID</td><td>PCI Subsystem ID code</td></tr>
+<tr><td>REVISION_ID</td><td>PCI Revision ID code</td></tr>
+<tr><td>CLASS_CODE</td><td>PCI Class code</td></tr>
+<tr><td>BAR0_LSB</td><td>least significant bit for BAR0 decoder</td></tr>
+<tr><td>LB_ADDR_WIDTH</td><td>local bus address width</td></tr>
+</tbody>
+</table>
+
+
+<h1>Source Code</h1>
+
+<p>
+spcis is open source. The source files are available 
+<a href="http://github.com/pdt/spcis">here</a>. 
+</p>
+
+<p>
+RTL code is contained in the <code>rtl/</code> directory. There are four files, the top level one being <code>spcis.vhdl</code>.
+</p>
+
+<p>
+Simulation files are in the <code>sim/</code> directory. The main testbench 
+file is the <code>spcis_test.vhdl</code> file. The 
+<code>spcis_test_lib.vhdl</code> file contains various support procedures. The
+testbench code has been tested on ModelSim and Xilinx ISim.
+</p>
+
+<p>
+The test bench verifies basic operation of the PCI interface, and
+then goes on to test local bus operations, including both successful and 
+unsuccessful (timed-out) local bus read and writes.
+</p>
+
+
+<h1>Simulation</h1>
+
+<p>
+A <code>ttaskfile.tcl</code> file is provided for running a simulation under 
+Linux. To run a simulation with this file, install the ttask executable from 
+<a href="http://pdt.github.com/ttask">here</a>, and using a terminal, change to
+the directory containing the ttaskfile, type '<code>ttask</code>' to run the 
+simulation with ModelSim, or '<code>ttask simulator=xilinx-isim</code>' to 
+simulate with Xilinx ISim.
+</p>
+
+
+<h1>Usage</h1>
+
+<p>
+To use spcis in your own design, create a spcis instance, connect up the 
+module's PCI bus to the PCI connections on your FPGA, and connect the module 
+local bus to your own modules in your FPGA design. If you only do 32-bit read 
+and writes on the local bus, the local bus byte enables do not need to be 
+connected. spcis rst should be connected to an appropriate signal in your
+design to reset the module on power up.
+</p>
+
+<p>
+The generics on the spcis instance that relate to PCI configuration should 
+be set accordingly. It may be that the two remaining generics, BAR0_LSB and
+LB_ADDR_WIDTH, may be left at their defaults.
+</p>
+
+<p>
+The spcis module has been designed to readily meet PCI timing requirements. 
+It is however recommended that the PCI clock into the FPGA be connected to a
+global clock pin. Relative to the PCI clock signal, PCI I/O timings are 
+required to meet the following:
+</p>
+
+<table>
+<thead>
+<tr><td>Signal</td><td>Input setup</td><td>Input hold</td>
+<td>Output delay</td></tr>
+</thead>
+<tbody>
+<tr><td>idsel</td><td>7</td><td>0</td><td></td></tr>
+<tr> <td>c_n_be</td><td>7</td><td>0</td><td></td></tr>
+<tr><td>n_frame</td><td>7</td><td>0</td><td></td></tr>
+<tr><td>n_irdy</td><td>7</td><td>0</td><td></td></tr>
+<tr><td>ad</td><td>7</td><td>0</td><td>11</td></tr>
+<tr><td>n_devsel</td><td></td><td></td><td>11</td></tr>
+<tr><td>n_trdy</td><td></td><td></td><td>11</td></tr>
+<tr><td>n_stop</td><td></td><td></td><td>11</td></tr>
+<tr><td>par</td><td></td><td></td><td>11</td></tr>
+</tbody>
+</table>
+
+</body>
+</html>
+
