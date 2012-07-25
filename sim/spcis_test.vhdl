@@ -6,6 +6,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use work.spcis_test_lib.all;
+use work.tcase_lib.all;
 
 entity spcis_test is
 end entity;
@@ -63,10 +64,10 @@ begin
     
     test : process
     begin
-        report "Starting spcis_test testbench";
+        test_case("Slave PCI testcase", 5);
         wait for 10 us;
         stop <= true;
-        report "Completed spcis_test testbench";
+        test_case_complete;
         wait;
     end process;
     
@@ -79,7 +80,6 @@ begin
         wait until falling_edge(clk);
 
         -- check configuration register reset values
-        report "Starting register reset values test";
         pci_read_config(clk, pci_bus, PCI_DEVICE_VENDOR, data);
         assert data = x"321010ee" report "Error reading device/vendor ids";
         pci_read_config(clk, pci_bus, PCI_STATUS_COMMAND, data);
@@ -110,10 +110,9 @@ begin
         assert data = x"00000000" report "Error reading capabilities";
         pci_read_config(clk, pci_bus, PCI_LAT_GNT_PIN_LINE, data);
         assert data = x"000001ff" report "Error reading interrupt";
-        report "Completed register reset values test";
+        test_complete("Register reset values test");
 
         -- test bar register block sizes 
-        report "Starting BAR test";
         pci_write_config(clk, pci_bus, PCI_BAR0, x"ffffffff");
         pci_read_config(clk, pci_bus, PCI_BAR0, data);
         assert data = x"fe000000" report "Error reading BAR0 block size";
@@ -132,14 +131,13 @@ begin
         pci_write_config(clk, pci_bus, PCI_BAR5, x"ffffffff");
         pci_read_config(clk, pci_bus, PCI_BAR5, data);
         assert data = x"00000000" report "Error reading BAR5 block size";
-        report "Completed BAR test";
+        test_complete("BAR sizes test");
 
         -- set up bar0 and enable memory decoding
         pci_write_config(clk, pci_bus, PCI_BAR0, BASE0 & x"0000");
         set_mem_en(clk, pci_bus, '1');
 
         -- test local bus read and write
-        report "Starting local bus read/write test";
         pci_write(clk, pci_bus, BASE0 & x"0004", x"76543210");
         assert last_lb_data_out = x"76543210" and last_lb_acked = '1' and 
                 last_lb_addr = x"01" and last_lb_byte_en = "1111" and 
@@ -150,10 +148,9 @@ begin
                 last_lb_byte_en = "1111" and last_lb_rd = '1' and 
                 data = x"77442200" 
                 report "Error reading local bus";
-        report "Completed local bus read/write test";
+        test_complete("LB test");
 
         -- test local bus timeout of four clock cycles 
-        report "Starting local bus timeout test";
         pci_write(clk, pci_bus, BASE0 & x"0008", x"76543210");
         assert last_lb_acked = '0' and last_lb_addr = x"02" and 
                 last_lb_wr = '1'
@@ -162,10 +159,9 @@ begin
         assert last_lb_acked = '0' and last_lb_addr = x"02" and 
                 last_lb_rd = '1'
                 report "Error writing local bus with timeout";
-        report "Completed local bus timeout test";
+        test_complete("LB timeout test");
 
         -- check individual byte enables appear on local bus
-        report "Starting byte enables test";
         pci_write(clk, pci_bus, BASE0 & x"0004", "1110", x"76543210");
         assert last_lb_byte_en = "0001" 
                 report "Error testing byte enables";
@@ -178,12 +174,7 @@ begin
         pci_read(clk, pci_bus, BASE0 & x"0004", "0111", data);
         assert last_lb_byte_en = "1000" 
                 report "Error testing byte enables";
-        report "Completed byte enables test";
-
-        -- check slave doesn't respond to transaction for other device
-        report "Starting ignore transaction test";
-        pci_master_slave_trans(clk, pci_bus, x"f6000000");
-        report "Completed ignore transaction test";
+        test_complete("LB byte enables test");
 
         wait;
     end process;
