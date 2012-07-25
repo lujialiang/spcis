@@ -64,7 +64,7 @@ begin
     
     test : process
     begin
-        test_case("Slave PCI testcase", 5);
+        test_case("spcis test case", 5);
         wait for 10 us;
         stop <= true;
         test_case_complete;

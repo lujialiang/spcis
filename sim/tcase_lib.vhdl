@@ -28,7 +28,7 @@ package body tcase_lib is
             constant desc : in string;
             constant count : in natural) is
     begin
-        report "*** running testcase: " & desc;
+        report "*** running test case: " & desc;
         total_tests := count;
     end procedure;
  
