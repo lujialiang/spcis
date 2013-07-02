@@ -3,10 +3,11 @@
 -- spcis_test.vhdl
 --
 --------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use work.spcis_test_lib.all;
-use work.tcase_lib.all;
+use work.tbmsgs.all;
 
 entity spcis_test is
 end entity;
@@ -64,10 +65,10 @@ begin
     
     test : process
     begin
-        test_case("spcis test case", 5);
+        testcase("spcis test case", 5);
         wait for 10 us;
         stop <= true;
-        test_case_complete;
+        testcase_complete;
         wait;
     end process;
     
@@ -81,57 +82,57 @@ begin
 
         -- check configuration register reset values
         pci_read_config(clk, pci_bus, PCI_DEVICE_VENDOR, data);
-        assert data = x"321010ee" report "Error reading device/vendor ids";
+        check(data = x"321010ee", "Error reading device/vendor ids");
         pci_read_config(clk, pci_bus, PCI_STATUS_COMMAND, data);
-        assert data = x"04000000" report "Error reading status/command";
+        check(data = x"04000000", "Error reading status/command");
         pci_read_config(clk, pci_bus, PCI_CLASS_REV, data);
-        assert data = x"ff000000" report "Error reading class/revision";
+        check(data = x"ff000000", "Error reading class/revision");
         pci_read_config(clk, pci_bus, PCI_LATENCY_CACHE, data);
-        assert data = x"00000000" report "Error reading latency/cache";
+        check(data = x"00000000", "Error reading latency/cache");
         pci_read_config(clk, pci_bus, PCI_BAR0, data);
-        assert data = x"00000000" report "Error reading BAR0";
+        check(data = x"00000000", "Error reading BAR0");
         pci_read_config(clk, pci_bus, PCI_BAR1, data);
-        assert data = x"00000000" report "Error reading BAR1";
+        check(data = x"00000000", "Error reading BAR1");
         pci_read_config(clk, pci_bus, PCI_BAR2, data);
-        assert data = x"00000000" report "Error reading BAR2";
+        check(data = x"00000000", "Error reading BAR2");
         pci_read_config(clk, pci_bus, PCI_BAR3, data);
-        assert data = x"00000000" report "Error reading BAR3";
+        check(data = x"00000000", "Error reading BAR3");
         pci_read_config(clk, pci_bus, PCI_BAR4, data);
-        assert data = x"00000000" report "Error reading BAR4";
+        check(data = x"00000000", "Error reading BAR4");
         pci_read_config(clk, pci_bus, PCI_BAR5, data);
-        assert data = x"00000000" report "Error reading BAR5";
+        check(data = x"00000000", "Error reading BAR5");
         pci_read_config(clk, pci_bus, PCI_CARDBUS, data);
-        assert data = x"00000000" report "Error reading cardbus";
+        check(data = x"00000000", "Error reading cardbus");
         pci_read_config(clk, pci_bus, PCI_SUB_VENDOR, data);
-        assert data = x"ba987654" report "Error reading subsystem ids";
+        check(data = x"ba987654", "Error reading subsystem ids");
         pci_read_config(clk, pci_bus, PCI_EXP_ROM, data);
-        assert data = x"00000000" report "Error reading expansion rom";
+        check(data = x"00000000", "Error reading expansion rom");
         pci_read_config(clk, pci_bus, PCI_CAP_PTR, data);
-        assert data = x"00000000" report "Error reading capabilities";
+        check(data = x"00000000", "Error reading capabilities");
         pci_read_config(clk, pci_bus, PCI_LAT_GNT_PIN_LINE, data);
-        assert data = x"000001ff" report "Error reading interrupt";
-        test_complete("Register reset values test");
+        check(data = x"000001ff", "Error reading interrupt");
+        tested("Register reset values test");
 
         -- test bar register block sizes 
         pci_write_config(clk, pci_bus, PCI_BAR0, x"ffffffff");
         pci_read_config(clk, pci_bus, PCI_BAR0, data);
-        assert data = x"fe000000" report "Error reading BAR0 block size";
+        check(data = x"fe000000", "Error reading BAR0 block size");
         pci_write_config(clk, pci_bus, PCI_BAR1, x"ffffffff");
         pci_read_config(clk, pci_bus, PCI_BAR1, data);
-        assert data = x"00000000" report "Error reading BAR1 block size";
+        check(data = x"00000000", "Error reading BAR1 block size");
         pci_write_config(clk, pci_bus, PCI_BAR2, x"ffffffff");
         pci_read_config(clk, pci_bus, PCI_BAR2, data);
-        assert data = x"00000000" report "Error reading BAR2 block size";
+        check(data = x"00000000", "Error reading BAR2 block size");
         pci_write_config(clk, pci_bus, PCI_BAR3, x"ffffffff");
         pci_read_config(clk, pci_bus, PCI_BAR3, data);
-        assert data = x"00000000" report "Error reading BAR3 block size";
+        check(data = x"00000000", "Error reading BAR3 block size");
         pci_write_config(clk, pci_bus, PCI_BAR4, x"ffffffff");
         pci_read_config(clk, pci_bus, PCI_BAR4, data);
-        assert data = x"00000000" report "Error reading BAR4 block size";
+        check(data = x"00000000", "Error reading BAR4 block size");
         pci_write_config(clk, pci_bus, PCI_BAR5, x"ffffffff");
         pci_read_config(clk, pci_bus, PCI_BAR5, data);
-        assert data = x"00000000" report "Error reading BAR5 block size";
-        test_complete("BAR sizes test");
+        check(data = x"00000000", "Error reading BAR5 block size");
+        tested("BAR sizes test");
 
         -- set up bar0 and enable memory decoding
         pci_write_config(clk, pci_bus, PCI_BAR0, BASE0 & x"0000");
@@ -139,42 +140,34 @@ begin
 
         -- test local bus read and write
         pci_write(clk, pci_bus, BASE0 & x"0004", x"76543210");
-        assert last_lb_data_out = x"76543210" and last_lb_acked = '1' and 
+        check(last_lb_data_out = x"76543210" and last_lb_acked = '1' and 
                 last_lb_addr = x"01" and last_lb_byte_en = "1111" and 
-                last_lb_wr = '1'
-                report "Error writing local bus";
+                last_lb_wr = '1', "Error writing local bus");
         pci_read(clk, pci_bus, BASE0 & x"0004", data);
-        assert last_lb_acked = '1' and last_lb_addr = x"01" and 
+        check(last_lb_acked = '1' and last_lb_addr = x"01" and 
                 last_lb_byte_en = "1111" and last_lb_rd = '1' and 
-                data = x"77442200" 
-                report "Error reading local bus";
-        test_complete("LB test");
+                data = x"77442200", "Error reading local bus");
+        tested("LB test");
 
         -- test local bus timeout of four clock cycles 
         pci_write(clk, pci_bus, BASE0 & x"0008", x"76543210");
-        assert last_lb_acked = '0' and last_lb_addr = x"02" and 
-                last_lb_wr = '1'
-                report "Error writing local bus with timeout";
+        check(last_lb_acked = '0' and last_lb_addr = x"02" and 
+                last_lb_wr = '1', "Error writing local bus with timeout");
         pci_read(clk, pci_bus, BASE0 & x"0008", data);
-        assert last_lb_acked = '0' and last_lb_addr = x"02" and 
-                last_lb_rd = '1'
-                report "Error writing local bus with timeout";
-        test_complete("LB timeout test");
+        check(last_lb_acked = '0' and last_lb_addr = x"02" and 
+                last_lb_rd = '1', "Error writing local bus with timeout");
+        tested("LB timeout test");
 
         -- check individual byte enables appear on local bus
         pci_write(clk, pci_bus, BASE0 & x"0004", "1110", x"76543210");
-        assert last_lb_byte_en = "0001" 
-                report "Error testing byte enables";
+        check(last_lb_byte_en = "0001", "Error testing byte enables");
         pci_read(clk, pci_bus, BASE0 & x"0004", "1101", data);
-        assert last_lb_byte_en = "0010" 
-                report "Error testing byte enables";
+        check(last_lb_byte_en = "0010", "Error testing byte enables");
         pci_write(clk, pci_bus, BASE0 & x"0004", "1011", x"76543210");
-        assert last_lb_byte_en = "0100" 
-                report "Error testing byte enables";
+        check(last_lb_byte_en = "0100", "Error testing byte enables");
         pci_read(clk, pci_bus, BASE0 & x"0004", "0111", data);
-        assert last_lb_byte_en = "1000" 
-                report "Error testing byte enables";
-        test_complete("LB byte enables test");
+        check(last_lb_byte_en = "1000", "Error testing byte enables");
+        tested("LB byte enables test");
 
         wait;
     end process;
