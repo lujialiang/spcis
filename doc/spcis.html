@@ -4,42 +4,9 @@
 <html>
 <head>
 <title>spcis - Open source PCI slave VHDL module</title>
+<link href="styles.css" rel="stylesheet" type="text/css">
 
 <style type="text/css">
-
-a {
-  outline: 0;
-}
-
-#top {
-  margin-left: 0px;
-  margin-top: 0px;
-  margin-bottom: 0px;
-}
-
-#top-menu {
-  float: right;
-}
-
-body { 
-  font-family: sans-serif;
-  font-size: 10pt;
-  max-width: 45em; 
-  margin-left: auto;
-  margin-right: auto;
-} 
-
-.codebox {
-  font-size: 9pt;
-  background: #e0e0ff;
-  border: 1px solid #a0a0ff;
-  width: 90%;
-  margin-top: 25px;
-  margin-bottom: 25px;  
-  margin-left: 2%;
-  margin-right: auto;
-  padding-left: 10px;
-}
 
 thead {
   font-style: italic;
@@ -56,28 +23,15 @@ td {
   border: 1px solid;
 }
 
-h1 {
-  font-size: 120%;
-}
-
-h2 {
-  font-size: 100%;
-  font-style: italic;
-}
-
-.syn-cmt {
-  color: #007000;
-}
-
 </style>
 </head>
 <body>
 
-<img id="top" src="gates.png" />
+<div id="header">
+<img src="gates.png"/>
+</div>
 
-<span id="top-menu">
-<a href="http://pdt.github.com/">pdt home</a>
-</span>
+<div id="separator"></div>
 
 <h1>spcis</h1>
 
@@ -115,7 +69,7 @@ generics for configuration. The module also has an active high asynchronous
 reset for resetting all parts of the module. 
 </p>
 
-<h1>PCI Interface</h1>
+<h2>PCI Interface</h2>
 
 <p>
 PCI interface signals are as follows:
@@ -147,8 +101,7 @@ requirements of the system it's used in, but isn't used to check parity during
 PCI writes.
 </p>
 
-
-<h1>LB Interface</h1>
+<h2>LB Interface</h2>
 
 <p>
 Local bus signals are as follows:
@@ -186,7 +139,7 @@ if no ack is received within 4 clock periods. All local bus signals are active
 high.
 </p>
 
-<h1>Generics</h1>
+<h2>Generics</h2>
 
 <p>
 Generics for setting PCI configuration registers, and configuring the module
@@ -209,8 +162,7 @@ itself, are as follows:
 </tbody>
 </table>
 
-
-<h1>Source Code</h1>
+<h2>Source Code</h2>
 
 <p>
 spcis is open source. The source files are available 
@@ -225,29 +177,28 @@ RTL code is contained in the <code>rtl/</code> directory. There are four files, 
 Simulation files are in the <code>sim/</code> directory. The main testbench 
 file is the <code>spcis_test.vhdl</code> file. The 
 <code>spcis_test_lib.vhdl</code> file contains various support procedures. The
-testbench code has been tested on ModelSim and Xilinx ISim.
+testbench code has been tested with ModelSim, Xilinx ISim and GHDL.
 </p>
 
 <p>
-The test bench verifies basic operation of the PCI interface, and
-then goes on to test local bus operations, including both successful and 
-unsuccessful (timed-out) local bus read and writes.
+The testbench verifies basic operation of the PCI interface, and then goes on 
+to test local bus operations, including both successful and unsuccessful 
+(timed-out) local bus read and writes.
 </p>
 
-
-<h1>Simulation</h1>
+<h2>Simulation</h2>
 
 <p>
-A <code>ttaskfile.tcl</code> file is provided for running a simulation under 
-Linux. To run a simulation with this file, install the ttask executable from 
-<a href="http://pdt.github.com/ttask">here</a>, and using a terminal, change to
-the directory containing the ttaskfile, type '<code>ttask</code>' to run the 
-simulation with ModelSim, or '<code>ttask simulator=xilinx-isim</code>' to 
-simulate with Xilinx ISim.
+A <code>ttaskfile.tcl</code> file is provided for simulating under Linux or 
+Windows. To run a simulation with this file, install ttask from 
+<a href="http://pdt.github.com/ttask">here</a>, and using a terminal change to
+the directory containing the ttaskfile, type '<code>ttask sim</code>' to run 
+the simulation with ModelSim, or 
+'<code>ttask sim simulator=xilinx-isim</code>' to simulate with Xilinx ISim,
+or '<code>ttask sim simulator=ghdl</code>' to simulate with GHDL (Linux only).
 </p>
 
-
-<h1>Usage</h1>
+<h2>Usage</h2>
 
 <p>
 To use spcis in your own design, create a spcis instance, connect up the 
@@ -266,9 +217,8 @@ LB_ADDR_WIDTH, may be left at their defaults.
 
 <p>
 The spcis module has been designed to readily meet PCI timing requirements. 
-It is however recommended that the PCI clock into the FPGA be connected to a
-global clock pin. Relative to the PCI clock signal, PCI I/O timings are 
-required to meet the following:
+Relative to the PCI clock signal, PCI I/O timings are required to meet the 
+following:
 </p>
 
 <table>
@@ -288,6 +238,14 @@ required to meet the following:
 <tr><td>par</td><td></td><td></td><td>11</td></tr>
 </tbody>
 </table>
+
+<p></p>
+
+<div id="separator"></div>
+
+<div id="footer">
+Copyright &copy 2013 Paul Taylor
+<div>
 
 </body>
 </html>

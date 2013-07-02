@@ -1,0 +1,107 @@
+
+body { 
+  font-family: sans-serif;
+  font-size: 10pt;
+  max-width: 45em; 
+  margin-left: auto;
+  margin-right: auto;
+} 
+
+h1 {
+  font-size: 120%;
+}
+
+h2 {
+  font-size: 100%;
+  font-style: italic;
+}
+
+a {
+  outline: 0;
+}
+
+#header {
+  position: relative;
+}
+
+#header img {
+  margin-left: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+#header #menu {
+  font-size: 80%;
+  color: gray;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+}
+
+#header #menu a:link {
+  text-decoration:none; 
+  color: gray; 
+}
+
+#header #menu a:visited {
+  text-decoration:none; 
+  color: gray;
+}
+
+#header #menu a:hover {
+  color: black;
+}
+
+#separator {
+  padding-top: 3px;
+  border-bottom: 1px solid #a0a0ff;
+}
+
+#footer {
+  font-style: italic;
+  font-size: 80%;
+  margin-top: 5px;
+  color: gray;
+}
+
+.codebox {
+  font-size: 9pt;
+  background: #e0e0ff;
+  border: 1px solid #a0a0ff;
+  width: 90%;
+  margin-top: 25px;
+  margin-bottom: 25px;  
+  margin-left: 2%;
+  margin-right: auto;
+  padding-left: 10px;
+}
+
+table.ext-props {
+  margin-left: 2%;
+  max-width: 90%;
+  background: #e0e0ff;
+  border: 1px solid #a0a0ff;
+ font-weight: normal;
+}
+
+.syn-cmt {
+  color: #007000;
+}
+
+.syn-var {
+  color: #006699;
+}
+
+.syn-cmd {
+  color: #cc0000;
+}
+
+.screen_shot {
+}
+
+.screen_shot {
+  margin-left: 2%;
+  max-width: 90%;
+  border-width: 0;
+}
+
