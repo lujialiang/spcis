@@ -10,5 +10,5 @@ task clean {rmdir build}
 
 project add sim -type $simulator
 sim src -add {rtl/*.vhdl sim/*.vhdl} 
-sim build -buildDir build
+sim build -buildDir build -dep auto
 
