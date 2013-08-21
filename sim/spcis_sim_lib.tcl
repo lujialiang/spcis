@@ -88,7 +88,7 @@ class PCIMaster {
         if {$cmd == $CONFIG_WR} {
             set idsel 1
         }
-        c_n_be <= $cmd;
+        set c_n_be $cmd
         at +clk
         set idsel 0bz
         set ad $data
@@ -131,31 +131,29 @@ class PCIMaster {
 
 # local bus monitor
 class LBMonitor {
-    inport clk rst dataIn addr byteEn rd wr 
-    outport dataOut ack int
+    inport clk rst data_in addr byte_en rd wr 
+    outport data_out ack int
 
     ro variables lastRd lastWr lastAddr lastByteEn lastDataIn lastDataOut \
             lastAck 
 
-    method run {} {
-        run * monitor
-    }
-
-    method monitor {} {
-        at +clk {$rd || $wr}
-        set lastRd $rd
-        set lastWr $wr
-        set lastDataOut $dataOut
-        set lastAddr $addr
-        set lastByteEn $byteEn
-        if {$ack} {
-            set lastAck 1
-        } else {
-            at +clk {$ack} -countout 3
-            set lastAck [expr {![thread countout]}]
+    method start {} {
+        run * {
+            at +clk {$rd || $wr}
+            set lastRd $rd
+            set lastWr $wr
+            set lastDataOut $data_out
+            set lastAddr $addr
+            set lastByteEn $byte_en
+            if {$ack} {
+                set lastAck 1
+            } else {
+                at +clk {$ack} -countout 3
+                set lastAck [expr {![thread countout]}]
+            }
+            set lastDataIn $data_in
+            at +clk
         }
-        set lastDataIn $dataIn
-        at +clk
     }
 }
 

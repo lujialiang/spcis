@@ -15,7 +15,7 @@ signal n_trdy_pu 0bh
 signal n_stop_pu 0bh
 signal n_inta_pu 0bh
 signal par_pu 0bh
-connect {ad_pu ad} {n_devsel_pu n_devsel} {n_trdy_pu n_trdy} \
+tie {ad_pu ad} {n_devsel_pu n_devsel} {n_trdy_pu n_trdy} \
         {n_stop_pu n_stop} {n_inta_pu n_inta} {par_pu par}
 
 run * {in 15.151; inv clk}
@@ -31,7 +31,7 @@ check {[getbits -unresolved -bin {ad n_devsel n_trdy n_stop n_inta par}] == \
         [getbits -bin {%37 *0bz}]}
 tested "all in/outs are z at reset"
 
-$lb run
+$lb start
 at +clk; set rst 0
 
 check {[$pci readConfig DEVICE_VENDOR] == 0x321010ee} 
@@ -71,7 +71,7 @@ tested "local 32-bit bus cycles"
 
 foreach be {0b1110 0b1101 0b1011 0b0111} {
     $pci writeMemBytes [expr {$baseAddr + 4}] $be 0x76543210
-    check {[$lb get byteEn] == (!$be & 0xf)}
+    check {[$lb get byteEn] == (~$be & 0xf)}
 }
 tested "local bus cycles with byte enables"
 
